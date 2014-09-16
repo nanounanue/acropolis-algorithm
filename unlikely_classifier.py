@@ -3,7 +3,7 @@
 # @Author: RaulSierra
 # @Date:   2014-09-11 11:25:37
 # @Last Modified by:   RaulSierra
-# @Last Modified time: 2014-09-12 16:29:58
+# @Last Modified time: 2014-09-16 10:04:05
 import itertools as itools
 import numpy as np
 from sklearn import tree
@@ -39,7 +39,7 @@ class UnlikelyClassifier(object):
                 model.fit(X[sub_X_indices], Y[sub_X_indices])
                 self.set_model(comb, model)
 
-        print "Models keys: " + str(self.models.keys())
+        print "Model dict keys: " + str(self.models.keys())
 
     def predict(self, X):
         predictions = self.__nested_predict(X, self.classes)
@@ -59,10 +59,13 @@ class UnlikelyClassifier(object):
             class_probs = model.predict_proba(X)
             unlikely_classes_data = get_unlikely_classes(class_probs, model.classes_)
             unlikely_classes = set(unlikely_classes_data)
-            predictions = np.empty(len(X))
+            predictions = np.zeros(len(X))
 
+            # Para cada una de las clases improbables, dejamos 
+            # solo los datos que tienen asignada esa clase como la menos probable y
+            # los pasamos a un modelo que ya no considera esa clase  
             for clss in unlikely_classes:
-                filter_idxs = np.where(unlikely_classes_data != clss)
+                filter_idxs = np.where(unlikely_classes_data == clss)
                 reduced_classes = [c for c in classes if c != clss]
 
                 predictions[filter_idxs] = self.__nested_predict(
